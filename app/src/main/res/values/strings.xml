@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Code Challenge</string>
+    <string name="search_movie">Search Movie</string>
     <string name="movie_and_genres">%s - %s</string>
+    <string name="release_date">Release date</string>
+    <string name="original_language">Original Language</string>
 </resources>

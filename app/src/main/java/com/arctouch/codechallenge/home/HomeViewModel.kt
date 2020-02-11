@@ -13,6 +13,8 @@ class HomeViewModel(private val homeRepository: HomeRepository) : ViewModel() {
     val disposable: CompositeDisposable = CompositeDisposable()
     val loading: PublishSubject<Boolean> = PublishSubject.create()
     val upcomingMovies: PublishSubject<List<Movie>> = PublishSubject.create()
+    val upcomingMoviesFromSearch: PublishSubject<List<Movie>> = PublishSubject.create()
+    var movie: PublishSubject<Movie> = PublishSubject.create()
     var page: Long = 1
 
     init {
@@ -23,25 +25,65 @@ class HomeViewModel(private val homeRepository: HomeRepository) : ViewModel() {
                 .doOnError { loading.onNext(false) }
                 .subscribe {
                     Cache.cacheGenres(it.genres)
-                    getUpcomingMovies()
+                    getUpcomingMovies(true)
                     loading.onNext(false)
                 }.let { disposable.add(it) }
     }
 
-    fun getUpcomingMovies() {
+    fun getUpcomingMovies(clearList: Boolean) {
         loading.onNext(true)
-        homeRepository.upcomingMovies(page = page)
+        homeRepository.upcomingMovies(page)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnError { loading.onNext(false) }
-                .subscribe {
-                    val moviesWithGenres = it.results.map { movie ->
+                .subscribe({ movies ->
+                    val moviesWithGenres = movies.results.map { movie ->
                         movie.copy(genres = Cache.genres.filter { genre -> movie.genreIds?.contains(genre.id) == true })
                     }
-                    upcomingMovies.onNext(moviesWithGenres)
+                    if (clearList) {
+                        upcomingMoviesFromSearch.onNext(moviesWithGenres)
+                    } else {
+                        upcomingMovies.onNext(moviesWithGenres)
+                    }
                     page += 1
                     loading.onNext(false)
-                }.let { disposable.add(it) }
+                }, { error ->
+                    error.printStackTrace()
+                    loading.onNext(false)
+                }).let { disposable.add(it) }
+    }
+
+    fun getMovie(id: Long) {
+        loading.onNext(true)
+        homeRepository.movie(id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError { loading.onNext(false) }
+                .subscribe({ movieGot ->
+                    movie.onNext(movieGot)
+                    loading.onNext(false)
+                }, { error ->
+                    error.printStackTrace()
+                    loading.onNext(false)
+                }).let { disposable.add(it) }
+    }
+
+    fun searchMovie(query: String) {
+        loading.onNext(true)
+        if (query.isBlank()) {
+            getUpcomingMovies(true)
+        } else {
+            homeRepository.searchMovie(query)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doOnError { loading.onNext(false) }
+                    .subscribe({ movies ->
+                        upcomingMoviesFromSearch.onNext(movies.results)
+                    }, { error ->
+                        error.printStackTrace()
+                        loading.onNext(false)
+                    }).let { disposable.add(it) }
+        }
     }
 
 }
