@@ -1,5 +1,6 @@
 package com.arctouch.codechallenge.splash
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import com.arctouch.codechallenge.R
@@ -12,6 +13,7 @@ import io.reactivex.schedulers.Schedulers
 
 class SplashActivity : BaseActivity() {
 
+    @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.splash_activity)

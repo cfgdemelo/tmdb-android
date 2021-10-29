@@ -1,0 +1,10 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin_backdrop">8dp</dimen>
+    <dimen name="dialog_photo_margin_horizontal">24dp</dimen>
+    <dimen name="dialog_photo_margin_vertical">48dp</dimen>
+    <dimen name="button_close_size">36dp</dimen>
+    <dimen name="progress_bar_margin">100dp</dimen>
+</resources>
